@@ -5,6 +5,7 @@ require "rbconfig"
 require "active_support/all"
 require "eventmachine"
 require "thin"
+require 'activesupport/json_encoder'
 
 if EventMachine::VERSION.in? ["1.0.4", "1.0.5"]
   module EventMachine
