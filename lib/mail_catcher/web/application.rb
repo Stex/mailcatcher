@@ -38,11 +38,11 @@ module MailCatcher
       else
         helpers do
           def javascript_tag(name)
-            %{<script src="/assets/#{name}.js"></script>}
+            %{<script src="assets/#{name}.js"></script>}
           end
 
           def stylesheet_tag(name)
-            %{<link rel="stylesheet" href="/assets/#{name}.css">}
+            %{<link rel="stylesheet" href="assets/#{name}.css">}
           end
         end
       end
