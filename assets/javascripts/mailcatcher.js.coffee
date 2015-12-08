@@ -46,7 +46,7 @@ class MailCatcher
       e.preventDefault()
       if confirm "You will lose all your received messages.\n\nAre you sure you want to clear all messages?"
         $.ajax
-          url: "/messages"
+          url: "#{window.location.pathname}messages"
           type: "DELETE"
           success: =>
             @unselectMessage()
@@ -100,7 +100,7 @@ class MailCatcher
       id = @selectedMessage()
       if id?
         $.ajax
-          url: "/messages/" + id
+          url: "#{window.location.pathname}messages/" + id
           type: "DELETE"
           success: =>
             messageRow = $("""#messages tbody tr[data-message-id="#{id}"]""")
@@ -118,6 +118,9 @@ class MailCatcher
 
     @refresh()
     @subscribe()
+
+  buildURL: (relativeURL) ->
+    "#{window.location.pathname}#{relativeURL}"
 
   # Only here because Safari's Date parsing *sucks*
   # We throw away the timezone, but you could use it for something...
@@ -220,7 +223,7 @@ class MailCatcher
       messageRow.addClass("selected")
       @scrollToRow(messageRow)
 
-      $.getJSON "/messages/#{id}.json", (message) =>
+      $.getJSON @buildURL("messages/#{id}.json"), (message) =>
         $("#message .metadata dd.created_at").text(@formatDate message.created_at)
         $("#message .metadata dd.from").text(message.sender)
         $("#message .metadata dd.to").text((message.recipients || []).join(", "))
@@ -229,7 +232,7 @@ class MailCatcher
           $el = $(el)
           format = $el.attr("data-message-format")
           if $.inArray(format, message.formats) >= 0
-            $el.find("a").attr("href", "/messages/#{id}.#{format}")
+            $el.find("a").attr("href", "messages/#{id}.#{format}")
             $el.show()
           else
             $el.hide()
@@ -247,7 +250,7 @@ class MailCatcher
         else
           $("#message .metadata .attachments").hide()
 
-        $("#message .views .download a").attr("href", "/messages/#{id}.eml")
+        $("#message .views .download a").attr("href", @buildURL("messages/#{id}.eml"))
 
         @loadMessageBody()
 
@@ -262,7 +265,7 @@ class MailCatcher
     $("""#message .views .tab:not([data-message-format="#{format}"]).selected""").removeClass("selected")
 
     if id?
-      $("#message iframe").attr("src", "/messages/#{id}.#{format}")
+      $("#message iframe").attr("src", @buildURL("messages/#{id}.#{format}"))
 
   decorateMessageBody: ->
     format = $("#message .views .tab.format.selected").attr("data-message-format")
@@ -279,7 +282,7 @@ class MailCatcher
         message_iframe.find("html").html("<html><body>#{text}</html></body>")
 
   refresh: ->
-    $.getJSON "/messages", (messages) =>
+    $.getJSON "messages", (messages) =>
       $.each messages, (i, message) =>
         unless @haveMessage message
           @addMessage message
@@ -294,7 +297,7 @@ class MailCatcher
   subscribeWebSocket: ->
     secure = window.location.protocol is "https:"
     protocol = if secure then "wss" else "ws"
-    @websocket = new WebSocket("#{protocol}://#{window.location.host}/messages")
+    @websocket = new WebSocket("#{protocol}://#{window.location.host}#{@buildURL('messages')}")
     @websocket.onmessage = (event) =>
       @addMessage $.parseJSON event.data
 

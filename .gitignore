@@ -7,3 +7,8 @@
 
 # Build gems
 *.gem
+
+.idea/
+
+.ruby-version
+.ruby-gemset
